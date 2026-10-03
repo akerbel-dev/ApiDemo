@@ -23,9 +23,14 @@ Symfony Docker is available under the MIT License.
 
 ## CF-FIX
 
-To check code style of your changes run
-`./vendor/bin/php-cs-fixer check`
+To check code style of your changes run inside php container
+`php ./vendor/bin/php-cs-fixer check`
 
-To fix conde style of your changes run
-`./vendor/bin/php-cs-fixer fix`
+To fix conde style of your changes run inside php container
+`php ./vendor/bin/php-cs-fixer fix`
+
+## PHPStan
+
+For static analisys run inside php container
+`php ./vendor/bin/phpstan analyse -c phpstan.dist.neon`
 
