@@ -9,8 +9,14 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-### Eclipse
+###> IDE
 /.settings
 /.project
 /.buildpath
-###
+/.idea
+###< IDE
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
