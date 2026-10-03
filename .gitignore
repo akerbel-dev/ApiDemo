@@ -8,3 +8,9 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+### Eclipse
+/.settings
+/.project
+/.buildpath
+###
