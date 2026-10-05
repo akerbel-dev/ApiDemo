@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -40,7 +41,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/create', name: 'create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
+    public function create(Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $data = json_decode($request->getContent(), true) ?? [];
         $dto = new CreateUserRequestDto($data);
@@ -58,7 +59,12 @@ final class UserController extends AbstractController
         $user->setEmail($dto->email);
         $user->setFirstName($dto->firstName);
         $user->setLastName($dto->lastName);
-        $user->setPassword($dto->password);
+
+        $hashedPassword = $passwordHasher->hashPassword(
+            $user,
+            $dto->password
+        );
+        $user->setPassword($hashedPassword);
 
         $this->em->persist($user);
         $this->em->flush();
