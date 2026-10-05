@@ -59,4 +59,6 @@ final class UserController extends AbstractController
             'lastName' => $user->getLastName(),
         ], 201);
     }
+    
+    
 }
