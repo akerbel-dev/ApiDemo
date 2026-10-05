@@ -2,9 +2,10 @@
 
 namespace App\Controller;
 
-use App\DTO\CreateUserRequest;
+use App\Dto\CreateUserRequestDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,15 +18,24 @@ final class UserController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly ValidatorInterface $validator,
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
     #[Route('/email/{email}', name: 'get', methods: ['GET'], requirements: ['email' => '.+@.+'])]
     public function getByEmail(string $email): JsonResponse
     {
-        return $this->json([
-            'message' => 'Welcome to your new controller!'.$email,
-            'path' => 'src/Controller/UserController.php',
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        return new JsonResponse([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
         ]);
     }
 
@@ -33,7 +43,7 @@ final class UserController extends AbstractController
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true) ?? [];
-        $dto = new CreateUserRequest($data);
+        $dto = new CreateUserRequestDto($data);
 
         $errors = $this->validator->validate($dto);
         if (count($errors) > 0) {
@@ -48,6 +58,7 @@ final class UserController extends AbstractController
         $user->setEmail($dto->email);
         $user->setFirstName($dto->firstName);
         $user->setLastName($dto->lastName);
+        $user->setPassword($dto->password);
 
         $this->em->persist($user);
         $this->em->flush();
@@ -59,6 +70,4 @@ final class UserController extends AbstractController
             'lastName' => $user->getLastName(),
         ], 201);
     }
-    
-    
 }
