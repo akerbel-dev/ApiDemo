@@ -33,3 +33,12 @@ To fix conde style of your changes run inside php container
 
 For static analisys run inside php container
 `php ./vendor/bin/phpstan analyse -c phpstan.dist.neon`
+
+## SSL keys
+
+run inside php container
+`bin/console lexik:jwt:generate-keypair --skip-if-exists`
+
+## Promote user to admin
+run inside php container
+`bin/console app:user:promote %email%`
