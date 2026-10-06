@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Dto\ChangePasswordRequestDto;
+use App\Dto\PaginationDto;
 use App\Dto\UpdateUserRequestDto;
 use App\Entity\User;
 use App\Entity\UserSerializer;
@@ -42,21 +43,16 @@ final class UserController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Pagination parameters
-        $page = max(1, (int) $request->query->get('page', 1));
-        $limit = min(100, max(1, (int) $request->query->get('limit', 20)));
-        // Hard cap at 100 to avoid huge responses
+        $pagination = PaginationDto::fromRequest($request);
 
-        $offset = ($page - 1) * $limit;
-
-        $users = $this->userRepository->findAllActive($limit, $offset);
+        $users = $this->userRepository->findAllActive($pagination->limit, $pagination->offset);
         $total = $this->userRepository->countActive();
 
         $data = array_map(fn (User $user) => $this->userSerializer->toArray($user), $users);
 
         return new JsonResponse([
-            'page' => $page,
-            'limit' => $limit,
+            'page' => $pagination->page,
+            'limit' => $pagination->limit,
             'total' => $total,
             'items' => $data,
         ]);
@@ -127,19 +123,16 @@ final class UserController extends AbstractController
         $lastName = $request->query->get('lastName');
         $role = $request->query->get('role');
 
-        // Pagination
-        $page = max(1, (int) $request->query->get('page', 1));
-        $limit = min(100, max(1, (int) $request->query->get('limit', 20)));
-        $offset = ($page - 1) * $limit;
+        $pagination = PaginationDto::fromRequest($request);
 
-        $results = $this->userRepository->searchUsers($email, $firstName, $lastName, $role, $limit, $offset);
+        $results = $this->userRepository->searchUsers($email, $firstName, $lastName, $role, $pagination->limit, $pagination->offset);
         $total = $this->userRepository->countSearchUsers($email, $firstName, $lastName, $role);
 
         $items = array_map(fn (User $user) => $this->userSerializer->toArray($user), $results);
 
         return new JsonResponse([
-            'page' => $page,
-            'limit' => $limit,
+            'page' => $pagination->page,
+            'limit' => $pagination->limit,
             'total' => $total,
             'items' => $items,
         ]);
@@ -149,7 +142,7 @@ final class UserController extends AbstractController
     public function changePassword(User $user, Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $this->denyAccessUnlessGranted(UserVoter::EDIT, $user);
+        $this->denyAccessUnlessGranted(UserVoter::CHANGE_PASSWORD, $user);
 
         $data = json_decode($request->getContent(), true) ?? [];
         $dto = new ChangePasswordRequestDto($data);
