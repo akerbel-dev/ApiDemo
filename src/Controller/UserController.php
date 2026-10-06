@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\ChangePasswordRequestDto;
 use App\Dto\UpdateUserRequestDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -9,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -19,6 +21,7 @@ final class UserController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly ValidatorInterface $validator,
         private readonly EntityManagerInterface $em,
+        private readonly UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
@@ -200,5 +203,58 @@ final class UserController extends AbstractController
             'total' => $total,
             'items' => $items,
         ]);
+    }
+
+    #[Route('/change-password/{id}', name: 'change_password', methods: ['POST'])]
+    public function changePassword(int $id, Request $request): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $current = $this->getUser();
+        if (!$current) {
+            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        }
+
+        $isAdmin = in_array('ROLE_ADMIN', $current->getRoles(), true);
+
+        if (!$isAdmin && $current->getId() !== $id) {
+            return new JsonResponse(['error' => 'Access denied'], 403);
+        }
+
+        $user = $this->userRepository->find($id);
+        if (!$user || $user->isDeleted()) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true) ?? [];
+        $dto = new ChangePasswordRequestDto($data);
+        $errors = $this->validator->validate($dto);
+        if (count($errors) > 0) {
+            return new JsonResponse(['errors' => (string) $errors], 400);
+        }
+
+        $oldPassword = $dto->oldPassword;
+        $newPassword = $dto->newPassword;
+
+        if (!$newPassword) {
+            return new JsonResponse(['error' => 'New password is required'], 400);
+        }
+
+        if (!$isAdmin) {
+            if (!$oldPassword) {
+                return new JsonResponse(['error' => 'Old password is required'], 400);
+            }
+
+            if (!$this->passwordHasher->isPasswordValid($user, $oldPassword)) {
+                return new JsonResponse(['error' => 'Old password is incorrect'], 403);
+            }
+        }
+
+        $hashed = $this->passwordHasher->hashPassword($user, $newPassword);
+        $user->setPassword($hashed);
+
+        $this->em->flush();
+
+        return new JsonResponse(['status' => 'password changed']);
     }
 }

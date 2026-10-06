@@ -2,6 +2,7 @@
 
 namespace App\Dto;
 
+use App\Validator\StrongPassword;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class RegisterRequestDto
@@ -17,11 +18,7 @@ final class RegisterRequestDto
     public string $lastName;
 
     #[Assert\NotBlank(message: 'Password is required')]
-    #[Assert\Length(
-        min: 8,
-        max: 255,
-        minMessage: 'Password must be at least {{ limit }} characters long'
-    )]
+    #[StrongPassword]
     public string $password;
 
     public function __construct(array $data)
