@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Service;
 
 use App\Dto\PaginationDto;
+use App\Dto\RegisterRequestDto;
 use App\Dto\UpdateUserRequestDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
@@ -13,6 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[CoversClass(UserService::class)]
 final class UserServiceTest extends TestCase
@@ -27,12 +29,34 @@ final class UserServiceTest extends TestCase
     }
 
     #[Test]
+    public function createUser(): void
+    {
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->expects($this->once())->method('flush');
+
+        $service = new UserService($this->repo, $em, $this->createStub(UserPasswordHasherInterface::class));
+
+        $dto = new RegisterRequestDto([
+            'email' => 'new@example.com',
+            'firstName' => 'John',
+            'lastName' => 'Smith',
+            'password' => 'Valid12!',
+        ]);
+
+        $created = $service->createUser($dto);
+
+        $this->assertSame('new@example.com', $created->getEmail());
+        $this->assertSame('John', $created->getFirstName());
+        $this->assertSame('Smith', $created->getLastName());
+    }
+
+    #[Test]
     public function updateUserEmail(): void
     {
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->once())->method('flush');
 
-        $service = new UserService($this->repo, $em);
+        $service = new UserService($this->repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $user = new User();
         $user->setEmail('old@example.com');
@@ -50,7 +74,7 @@ final class UserServiceTest extends TestCase
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->once())->method('flush');
 
-        $service = new UserService($this->repo, $em);
+        $service = new UserService($this->repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $user = new User();
         $user->setFirstName('Old');
@@ -68,7 +92,7 @@ final class UserServiceTest extends TestCase
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->once())->method('flush');
 
-        $service = new UserService($this->repo, $em);
+        $service = new UserService($this->repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $user = new User();
         $user->setLastName('Old');
@@ -86,7 +110,7 @@ final class UserServiceTest extends TestCase
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->once())->method('flush');
 
-        $service = new UserService($this->repo, $em);
+        $service = new UserService($this->repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $user = new User();
         $user->setEmail('old@example.com');
@@ -108,7 +132,7 @@ final class UserServiceTest extends TestCase
         $em = $this->createMock(EntityManagerInterface::class);
         $em->expects($this->once())->method('flush');
 
-        $service = new UserService($this->repo, $em);
+        $service = new UserService($this->repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $user = new User();
 
@@ -126,7 +150,7 @@ final class UserServiceTest extends TestCase
 
         $em = $this->createStub(EntityManagerInterface::class);
 
-        $service = new UserService($repo, $em);
+        $service = new UserService($repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $pagination = new PaginationDto(1, 10, 0);
 
@@ -143,7 +167,7 @@ final class UserServiceTest extends TestCase
 
         $em = $this->createStub(EntityManagerInterface::class);
 
-        $service = new UserService($repo, $em);
+        $service = new UserService($repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $this->assertSame(5, $service->countActiveUsers());
     }
@@ -156,7 +180,7 @@ final class UserServiceTest extends TestCase
 
         $em = $this->createStub(EntityManagerInterface::class);
 
-        $service = new UserService($repo, $em);
+        $service = new UserService($repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $pagination = new PaginationDto(1, 10, 0);
 
@@ -173,7 +197,7 @@ final class UserServiceTest extends TestCase
 
         $em = $this->createStub(EntityManagerInterface::class);
 
-        $service = new UserService($repo, $em);
+        $service = new UserService($repo, $em, $this->createStub(UserPasswordHasherInterface::class));
 
         $count = $service->countSearchUsers('a@example.com', 'John', 'Doe', 'ROLE_USER');
 

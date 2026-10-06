@@ -3,17 +3,42 @@
 namespace App\Service;
 
 use App\Dto\PaginationDto;
+use App\Dto\RegisterRequestDto;
 use App\Dto\UpdateUserRequestDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserService
 {
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $em,
+        private readonly UserPasswordHasherInterface $hasher,
     ) {
+    }
+
+    public function createUser(RegisterRequestDto $dto): User
+    {
+        if ($this->userRepository->findOneBy(['email' => $dto->email])) {
+            throw new \DomainException('User already exists');
+        }
+
+        $user = new User();
+        $user->setEmail($dto->email);
+        $user->setFirstName($dto->firstName);
+        $user->setLastName($dto->lastName);
+        $user->setRoles(['ROLE_USER']);
+
+        $user->setPassword(
+            $this->hasher->hashPassword($user, $dto->password)
+        );
+
+        $this->em->persist($user);
+        $this->em->flush();
+
+        return $user;
     }
 
     public function updateUser(User $user, UpdateUserRequestDto $dto): User
