@@ -6,6 +6,7 @@ use App\Controller\AuthController;
 use App\Entity\User;
 use App\Tests\Factory\UserFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use Zenstruck\Foundry\Test\Factories;
@@ -17,7 +18,7 @@ final class AuthControllerTest extends WebTestCase
     use Factories;
     use ResetDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function registerSuccess(): void
     {
         $client = static::createClient();
@@ -41,7 +42,7 @@ final class AuthControllerTest extends WebTestCase
         $this->assertNotNull(UserFactory::repository()->findOneBy(['email' => 'anton@example.com']));
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function registerValidationError(): void
     {
         $client = static::createClient();
@@ -59,7 +60,7 @@ final class AuthControllerTest extends WebTestCase
         $this->assertArrayHasKey('errors', $data);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function registerDuplicateEmail(): void
     {
         $client = static::createClient();
@@ -80,7 +81,7 @@ final class AuthControllerTest extends WebTestCase
         $this->assertSame('User already exists', $data['error']);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function loginReturnsMessage(): void
     {
         $client = static::createClient();

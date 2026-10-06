@@ -33,6 +33,13 @@ final class UserFactory extends PersistentObjectFactory
         ];
     }
 
+    public function withPassword(string $password): self
+    {
+        $this->with(['password' => $password]);
+
+        return $this;
+    }
+
     protected function initialize(): static
     {
         return $this
