@@ -15,7 +15,7 @@ final class ChangePasswordRequestDto
     public ?string $newPassword = null;
 
     /**
-     * @param array<string, string> $data
+     * @param array<string, string|null> $data
      */
     public function __construct(array $data)
     {
