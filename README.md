@@ -21,7 +21,7 @@ against a local or a remote model, with an optional network sandbox.
 
 Symfony Docker is available under the MIT License.
 
-## CF-FIX
+## CS-FIX
 
 To check code style of your changes run inside php container
 `php ./vendor/bin/php-cs-fixer check`

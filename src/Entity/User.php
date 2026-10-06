@@ -144,6 +144,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->deletedAt;
     }
 
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
     public function softDelete(): void
     {
         $this->deletedAt = new \DateTimeImmutable();
