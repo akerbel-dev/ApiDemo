@@ -3,6 +3,7 @@
 namespace App\Tests\Factory;
 
 use App\Entity\User;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
 
 /**
@@ -10,6 +11,11 @@ use Zenstruck\Foundry\Persistence\PersistentObjectFactory;
  */
 final class UserFactory extends PersistentObjectFactory
 {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    ) {
+    }
+
     public static function class(): string
     {
         return User::class;
@@ -23,13 +29,17 @@ final class UserFactory extends PersistentObjectFactory
             'lastName' => self::faker()->lastName(),
             'roles' => ['ROLE_USER'],
             'deletedAt' => null,
+            'password' => 'Strong123!',
         ];
     }
 
     protected function initialize(): static
     {
         return $this
-        // ->afterInstantiate(function(Post $post): void {})
-        ;
+        ->afterInstantiate(function (User $user): void {
+            $plain = $user->getPassword();
+            $hashed = $this->passwordHasher->hashPassword($user, $plain);
+            $user->setPassword($hashed);
+        });
     }
 }

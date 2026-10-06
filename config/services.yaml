@@ -19,6 +19,11 @@ services:
     App\:
         resource: '../src/'
 
+    App\Tests\Factory\:
+        resource: '%kernel.project_dir%/tests/Factory/'
+        autowire: true
+        autoconfigure: true
+
     App\EventListener\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
