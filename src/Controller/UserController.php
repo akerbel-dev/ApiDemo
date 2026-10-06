@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Dto\ChangePasswordRequestDto;
 use App\Dto\UpdateUserRequestDto;
 use App\Entity\User;
+use App\Entity\UserSerializer;
 use App\Repository\UserRepository;
+use App\Security\UserVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,37 +24,17 @@ final class UserController extends AbstractController
         private readonly ValidatorInterface $validator,
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UserSerializer $userSerializer,
     ) {
     }
 
     #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function get(int $id): JsonResponse
+    public function get(User $user): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-        $current = $this->getUser();
-        if (!$current) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
-        }
+        $this->denyAccessUnlessGranted(UserVoter::VIEW, $user);
 
-        $isAdmin = in_array('ROLE_ADMIN', $current->getRoles(), true);
-        if (!$isAdmin && $current->getId() !== $id) {
-            return new JsonResponse(['error' => 'Access denied'], 403);
-        }
-
-        $user = $this->userRepository->find($id);
-
-        if (!$user || ($user->isDeleted() && !$isAdmin)) {
-            return new JsonResponse(['error' => 'User not found'], 404);
-        }
-
-        return new JsonResponse([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'firstName' => $user->getFirstName(),
-            'lastName' => $user->getLastName(),
-            'roles' => $user->getRoles(),
-            'deletedAt' => $user->getDeletedAt()?->format('c'),
-        ]);
+        return $this->json($this->userSerializer->toArray($user));
     }
 
     #[Route('/list', name: 'list', methods: ['GET'])]
@@ -70,16 +52,7 @@ final class UserController extends AbstractController
         $users = $this->userRepository->findAllActive($limit, $offset);
         $total = $this->userRepository->countActive();
 
-        $data = array_map(function (User $user) {
-            return [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'roles' => $user->getRoles(),
-                'deletedAt' => $user->getDeletedAt()?->format('c'),
-            ];
-        }, $users);
+        $data = array_map(fn (User $user) => $this->userSerializer->toArray($user), $users);
 
         return new JsonResponse([
             'page' => $page,
@@ -90,23 +63,10 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', methods: ['PUT', 'PATCH'], requirements: ['id' => '\d+'])]
-    public function edit(int $id, Request $request): JsonResponse
+    public function edit(User $user, Request $request): JsonResponse
     {
-        $current = $this->getUser();
-        if (!$current) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
-        }
         $this->denyAccessUnlessGranted('ROLE_USER');
-
-        $isAdmin = in_array('ROLE_ADMIN', $current->getRoles(), true);
-        if (!$isAdmin && $current->getId() !== $id) {
-            return new JsonResponse(['error' => 'Access denied'], 403);
-        }
-
-        $user = $this->userRepository->find($id);
-        if (!$user) {
-            return new JsonResponse(['error' => 'User not found'], 404);
-        }
+        $this->denyAccessUnlessGranted(UserVoter::EDIT, $user);
 
         $data = json_decode($request->getContent(), true) ?? [];
         $dto = new UpdateUserRequestDto($data);
@@ -139,24 +99,13 @@ final class UserController extends AbstractController
 
         $this->em->flush();
 
-        return new JsonResponse([
-            'id' => $user->getId(),
-            'email' => $user->getEmail(),
-            'firstName' => $user->getFirstName(),
-            'lastName' => $user->getLastName(),
-            'roles' => $user->getRoles(),
-        ]);
+        return $this->json($this->userSerializer->toArray($user));
     }
 
     #[Route('/{id}', methods: ['DELETE'], requirements: ['id' => '\d+'])]
-    public function delete(int $id): JsonResponse
+    public function delete(User $user): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
-
-        $user = $this->userRepository->find($id);
-        if (!$user) {
-            return new JsonResponse(['error' => 'User not found'], 404);
-        }
 
         if ($user->isDeleted()) {
             return new JsonResponse(['status' => 'already deleted']);
@@ -186,16 +135,7 @@ final class UserController extends AbstractController
         $results = $this->userRepository->searchUsers($email, $firstName, $lastName, $role, $limit, $offset);
         $total = $this->userRepository->countSearchUsers($email, $firstName, $lastName, $role);
 
-        $items = array_map(function (User $user) {
-            return [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'roles' => $user->getRoles(),
-                'deletedAt' => $user->getDeletedAt()?->format('c'),
-            ];
-        }, $results);
+        $items = array_map(fn (User $user) => $this->userSerializer->toArray($user), $results);
 
         return new JsonResponse([
             'page' => $page,
@@ -206,25 +146,10 @@ final class UserController extends AbstractController
     }
 
     #[Route('/change-password/{id}', name: 'change_password', methods: ['POST'])]
-    public function changePassword(int $id, Request $request): JsonResponse
+    public function changePassword(User $user, Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
-
-        $current = $this->getUser();
-        if (!$current) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
-        }
-
-        $isAdmin = in_array('ROLE_ADMIN', $current->getRoles(), true);
-
-        if (!$isAdmin && $current->getId() !== $id) {
-            return new JsonResponse(['error' => 'Access denied'], 403);
-        }
-
-        $user = $this->userRepository->find($id);
-        if (!$user || $user->isDeleted()) {
-            return new JsonResponse(['error' => 'User not found'], 404);
-        }
+        $this->denyAccessUnlessGranted(UserVoter::EDIT, $user);
 
         $data = json_decode($request->getContent(), true) ?? [];
         $dto = new ChangePasswordRequestDto($data);
