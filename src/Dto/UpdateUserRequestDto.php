@@ -15,6 +15,9 @@ final class UpdateUserRequestDto
     #[Assert\Length(max: 255)]
     public ?string $lastName = null;
 
+    /**
+     * @param array<string, string> $data
+     */
     public function __construct(array $data)
     {
         $this->email = $data['email'] ?? null;

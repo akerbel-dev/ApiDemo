@@ -14,6 +14,9 @@ final class ChangePasswordRequestDto
     #[StrongPassword]
     public ?string $newPassword = null;
 
+    /**
+     * @param array<string, string> $data
+     */
     public function __construct(array $data)
     {
         $this->oldPassword = $data['oldPassword'] ?? '';

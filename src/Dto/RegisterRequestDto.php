@@ -21,6 +21,9 @@ final class RegisterRequestDto
     #[StrongPassword]
     public string $password;
 
+    /**
+     * @param array<string, string> $data
+     */
     public function __construct(array $data)
     {
         $this->email = $data['email'] ?? '';

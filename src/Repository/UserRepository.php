@@ -44,6 +44,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->getOneOrNullResult();
     }
 
+    /**
+     * @return User[]
+     */
     public function findAllActive(int $limit, int $offset): array
     {
         return $this->createQueryBuilder('u')
@@ -64,6 +67,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->getSingleScalarResult();
     }
 
+    /**
+     * @return User[]
+     */
     public function searchUsers(
         ?string $email,
         ?string $firstName,

@@ -7,7 +7,6 @@ use App\Dto\UpdateUserRequestDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserService
 {
@@ -46,6 +45,9 @@ final class UserService
         $this->em->flush();
     }
 
+    /**
+     * @return User[]
+     */
     public function listActiveUsers(PaginationDto $pagination): array
     {
         return $this->userRepository->findAllActive(
@@ -59,6 +61,9 @@ final class UserService
         return $this->userRepository->countActive();
     }
 
+    /**
+     * @return User[]
+     */
     public function searchUsers(
         ?string $email,
         ?string $firstName,

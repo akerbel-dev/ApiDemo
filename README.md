@@ -34,6 +34,9 @@ To fix conde style of your changes run inside php container
 For static analisys run inside php container
 `php ./vendor/bin/phpstan analyse -c phpstan.dist.neon`
 
+To update PhpStan exceptions, run inside php container
+`php ./vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline`
+
 ## SSL keys
 
 run inside php container

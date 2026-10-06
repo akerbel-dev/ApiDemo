@@ -23,6 +23,7 @@ final class UserController extends AbstractController
         private readonly ValidatorInterface $validator,
         private readonly UserSerializer $serializer,
         private readonly UserService $userService,
+        private readonly PasswordService $passwordService,
     ) {
     }
 
@@ -132,7 +133,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/change-password/{id}', name: 'change_password', methods: ['POST'])]
-    public function changePassword(User $user, Request $request, PasswordService $passwordService): JsonResponse
+    public function changePassword(User $user, Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted(UserVoter::CHANGE_PASSWORD, $user);
 
@@ -148,7 +149,7 @@ final class UserController extends AbstractController
         $isAdmin = in_array('ROLE_ADMIN', $current->getRoles(), true);
 
         try {
-            $passwordService->changePassword($user, $dto, $isAdmin);
+            $this->passwordService->changePassword($user, $dto, $isAdmin);
         } catch (\InvalidArgumentException $e) {
             return $this->json(['error' => $e->getMessage()], 400);
         } catch (\DomainException $e) {
