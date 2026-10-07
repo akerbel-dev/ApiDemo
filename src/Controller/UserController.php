@@ -10,6 +10,7 @@ use App\Entity\UserSerializer;
 use App\Security\UserVoter;
 use App\Service\PasswordService;
 use App\Service\UserService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,20 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'get', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns user details',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'id', type: 'integer'),
+                new OA\Property(property: 'email', type: 'string'),
+                new OA\Property(property: 'firstName', type: 'string'),
+                new OA\Property(property: 'lastName', type: 'string'),
+                new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+            ]
+        )
+    )]
+    #[OA\Response(response: 403, description: 'Forbidden (UserVoter::VIEW denied)')]
     public function get(User $user): JsonResponse
     {
         $this->denyAccessUnlessGranted(UserVoter::VIEW, $user);
@@ -36,6 +51,32 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', methods: ['PUT', 'PATCH'], requirements: ['id' => '\d+'])]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'firstName', type: 'string'),
+                new OA\Property(property: 'lastName', type: 'string'),
+                new OA\Property(property: 'email', type: 'string', format: 'email'),
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'User updated successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'id', type: 'integer'),
+                new OA\Property(property: 'email', type: 'string'),
+                new OA\Property(property: 'firstName', type: 'string'),
+                new OA\Property(property: 'lastName', type: 'string'),
+                new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+            ]
+        )
+    )]
+    #[OA\Response(response: 400, description: 'Validation error')]
+    #[OA\Response(response: 409, description: 'Domain conflict error')]
+    #[OA\Response(response: 403, description: 'Forbidden (UserVoter::EDIT denied)')]
     public function edit(
         User $user,
         Request $request,
@@ -60,6 +101,16 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', methods: ['DELETE'], requirements: ['id' => '\d+'])]
+    #[OA\Response(
+        response: 200,
+        description: 'User soft deleted',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'status', type: 'string', example: 'soft deleted')
+            ]
+        )
+    )]
+    #[OA\Response(response: 403, description: 'Forbidden (requires ROLE_ADMIN)')]
     public function delete(User $user): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -74,6 +125,33 @@ final class UserController extends AbstractController
     }
 
     #[Route('/list', name: 'list', methods: ['GET'])]
+    #[OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer'), example: 1)]
+    #[OA\Parameter(name: 'limit', in: 'query', schema: new OA\Schema(type: 'integer'), example: 20)]
+    #[OA\Response(
+        response: 200,
+        description: 'Paginated list of active users',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'page', type: 'integer'),
+                new OA\Property(property: 'limit', type: 'integer'),
+                new OA\Property(property: 'total', type: 'integer'),
+                new OA\Property(
+                    property: 'items',
+                    type: 'array',
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'email', type: 'string'),
+                            new OA\Property(property: 'firstName', type: 'string'),
+                            new OA\Property(property: 'lastName', type: 'string'),
+                            new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+                        ]
+                    )
+                )
+            ]
+        )
+    )]
+    #[OA\Response(response: 403, description: 'Forbidden (requires ROLE_ADMIN)')]
     public function list(Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -95,6 +173,37 @@ final class UserController extends AbstractController
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
+    #[OA\Parameter(name: 'email', in: 'query', schema: new OA\Schema(type: 'string'))]
+    #[OA\Parameter(name: 'firstName', in: 'query', schema: new OA\Schema(type: 'string'))]
+    #[OA\Parameter(name: 'lastName', in: 'query', schema: new OA\Schema(type: 'string'))]
+    #[OA\Parameter(name: 'role', in: 'query', schema: new OA\Schema(type: 'string'))]
+    #[OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer'))]
+    #[OA\Parameter(name: 'limit', in: 'query', schema: new OA\Schema(type: 'integer'))]
+    #[OA\Response(
+        response: 200,
+        description: 'Search results',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'page', type: 'integer'),
+                new OA\Property(property: 'limit', type: 'integer'),
+                new OA\Property(property: 'total', type: 'integer'),
+                new OA\Property(
+                    property: 'items',
+                    type: 'array',
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'email', type: 'string'),
+                            new OA\Property(property: 'firstName', type: 'string'),
+                            new OA\Property(property: 'lastName', type: 'string'),
+                            new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+                        ]
+                    )
+                )
+            ]
+        )
+    )]
+    #[OA\Response(response: 403, description: 'Forbidden (requires ROLE_ADMIN)')]
     public function search(Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
@@ -133,6 +242,26 @@ final class UserController extends AbstractController
     }
 
     #[Route('/change-password/{id}', name: 'change_password', methods: ['POST'])]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            required: ['oldPassword', 'newPassword'],
+            properties: [
+                new OA\Property(property: 'oldPassword', type: 'string'),
+                new OA\Property(
+                    property: 'newPassword',
+                    type: 'string',
+                    description: 'Must be at least 8 chars, contain uppercase, lowercase, number, and special character.',
+                    minLength: 8,
+                    pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W]).+$',
+                    example: 'StrongPass123!'
+                    ),
+            ]
+        )
+    )]
+    #[OA\Response(response: 200, description: 'Password changed')]
+    #[OA\Response(response: 400, description: 'Invalid password or validation error')]
+    #[OA\Response(response: 403, description: 'Forbidden (UserVoter::CHANGE_PASSWORD denied)')]
     public function changePassword(User $user, Request $request): JsonResponse
     {
         $this->denyAccessUnlessGranted(UserVoter::CHANGE_PASSWORD, $user);
