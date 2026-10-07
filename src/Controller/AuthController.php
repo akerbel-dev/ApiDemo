@@ -5,12 +5,12 @@ namespace App\Controller;
 use App\Dto\RegisterRequestDto;
 use App\Entity\UserSerializer;
 use App\Service\UserService;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use OpenApi\Attributes as OA;
 
 #[Route('/auth')]
 final class AuthController extends AbstractController
@@ -87,13 +87,13 @@ final class AuthController extends AbstractController
                     type: 'string',
                     format: 'email',
                     example: 'user@example.com'
-                    ),
+                ),
                 new OA\Property(
                     property: 'password',
                     type: 'string',
                     description: 'User password',
                     example: 'StrongPass123!'
-                    ),
+                ),
             ]
         )
     )]
@@ -107,7 +107,7 @@ final class AuthController extends AbstractController
                     type: 'string',
                     description: 'JWT access token',
                     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-                    )
+                ),
             ]
         )
     )]
@@ -120,7 +120,7 @@ final class AuthController extends AbstractController
                     property: 'message',
                     type: 'string',
                     example: 'Invalid credentials.'
-                    )
+                ),
             ]
         )
     )]

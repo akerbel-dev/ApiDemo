@@ -106,7 +106,7 @@ final class UserController extends AbstractController
         description: 'User soft deleted',
         content: new OA\JsonContent(
             properties: [
-                new OA\Property(property: 'status', type: 'string', example: 'soft deleted')
+                new OA\Property(property: 'status', type: 'string', example: 'soft deleted'),
             ]
         )
     )]
@@ -147,7 +147,7 @@ final class UserController extends AbstractController
                             new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
                         ]
                     )
-                )
+                ),
             ]
         )
     )]
@@ -199,7 +199,7 @@ final class UserController extends AbstractController
                             new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
                         ]
                     )
-                )
+                ),
             ]
         )
     )]
@@ -255,7 +255,7 @@ final class UserController extends AbstractController
                     minLength: 8,
                     pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W]).+$',
                     example: 'StrongPass123!'
-                    ),
+                ),
             ]
         )
     )]
