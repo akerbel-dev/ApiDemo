@@ -1,0 +1,277 @@
+{
+  "info": {
+    "_postman_id": "94b36d2b-5410-4c98-a191-0e2cad3a57f6",
+    "name": "My Collection",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58735084",
+    "_collection_link": "https://go.postman.co/collection/58735084-94b36d2b-5410-4c98-a191-0e2cad3a57f6?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "/auth/register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"test8@test.com\",\r\n    \"firstName\": \"Anton\",\r\n    \"lastName\": \"Test\",\r\n    \"password\": \"Qwerty1!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://localhost/auth/register",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/auth/login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"test8@test.com\",\r\n    \"password\": \"Qwerty1!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://localhost/auth/login",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/1",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost/user/5",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "user",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/list",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost/user/list?page=1&limit=20",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "user",
+            "list"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/1",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"firstName\": \"Anton2\",\r\n    \"lastName\": \"Test2\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://localhost/user/5",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "user",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/1",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "https://localhost/user/2",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "user",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/search",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://localhost/user/search?email=test7@test.com",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "user",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "email",
+              "value": "test7@test.com"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/user/change-password/3",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"oldPassword\": \"1\",\r\n    \"newPassword\": \"Qwertz1!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://localhost/user/change-password/3",
+          "protocol": "https",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "user",
+            "change-password",
+            "3"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
