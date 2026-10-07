@@ -17,12 +17,10 @@ against a local or a remote model, with an optional network sandbox.
 1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
 2. Run `docker compose build --pull --no-cache` to build fresh images
 3. Run `docker compose up --wait` to set up and start a fresh Symfony project
-4. Enter php container `docker exec -it apidemo-php-1 bash`
-5. Run composer `composer install`
-6. Create certificates for JWT tokens `bin/console lexik:jwt:generate-keypair --skip-if-exists`
-7. Open Swagger `https://localhost/api/doc` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-8. If you need some demo users run: `bin/console app:create-demo-users`
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+4. Create certificates for JWT tokens `bin/console lexik:jwt:generate-keypair --skip-if-exists`
+5. Open Swagger `https://localhost/api/doc` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
+6. If you need some demo users run: `bin/console app:create-demo-users`
+7. Run `docker compose down --remove-orphans` to stop the Docker containers.
 
 ## TESTS
 
