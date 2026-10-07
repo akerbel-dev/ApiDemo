@@ -1,0 +1,33 @@
+nelmio_api_doc:
+  areas:
+    default:
+      path_patterns:
+        - ^/auth
+        - ^/user
+
+      documentation:
+        info:
+          title: User API
+          description: Demo API
+          version: 1.0.0
+
+        components:
+          securitySchemes:
+            bearerAuth:
+              type: http
+              scheme: bearer
+              bearerFormat: JWT
+
+        security:
+          - bearerAuth: []
+          
+        paths:
+          /auth/login:
+            post:
+              # Override: /auth/login is PUBLIC
+              security: []
+
+          /auth/register:
+            post:
+              # Override: /auth/register is PUBLIC
+              security: []

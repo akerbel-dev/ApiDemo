@@ -20,6 +20,7 @@ services:
       STABILITY: ${STABILITY:-stable}
       ###< dunglas/symfony-docker ###
     volumes:
+      - ./:/app
       - caddy_data:/data
       - caddy_config:/config
     ports:
@@ -56,6 +57,8 @@ services:
       start_period: 60s
     volumes:
       - database_data:/var/lib/mysql:rw
+      # Had to add "app" user previlegies to create databases to run application tests
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/mysql:rw
 ###< doctrine/doctrine-bundle ###
